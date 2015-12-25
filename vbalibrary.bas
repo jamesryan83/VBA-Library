@@ -1,37 +1,29 @@
-Attribute VB_Name = "JamesLibrary"
+Attribute VB_Name = "VBALibrary"
 Option Explicit
 
-' Things to add
-' copy unique values from range
-
 ' ==========================================================================================================================================================================
-'                                   Colours
+'                                   Colors
 ' ==========================================================================================================================================================================
 
-Public Const cCLEAR As Long = -4142
+Public Const cCLEAR As Long = -4142 'use colorindex instead of color for this one
 Public Const cBLACK As Long = 0
 Public Const cBEIGE As Long = 12900829
-Public Const cBLUE As Long = 15773696 'sky blue
-Public Const cBLUE2 As Long = 15849925
-Public Const cBLUE3 As Long = 14136213
-Public Const cBLUE4 As Long = 13929812
-Public Const cGREEN As Long = 12379352
+Public Const cBLUE1 As Long = 15849925 'lightest
+Public Const cBLUE2 As Long = 14136213
+Public Const cBLUE3 As Long = 13929812
+Public Const cBLUE4 As Long = 15773696 'darkest
+Public Const cGREEN1 As Long = 12379352 'lightest
 Public Const cGREEN2 As Long = 5296274
-Public Const cGREEN3 As Long = 5287936 'regular green
+Public Const cGREEN3 As Long = 5287936 'darkest
 Public Const cPURPLE As Long = 13082801
-Public Const cGRAY As Long = 8421504 'darkest
+Public Const cGRAY1 As Long = 14277081 'lightest
 Public Const cGRAY2 As Long = 12566463
-Public Const cGRAY3 As Long = 14277081
+Public Const cGRAY3 As Long = 8421504 'darkest
 Public Const cORANGE As Long = 49407
 Public Const cYELLOW As Long = 65535
 Public Const cRED As Long = 255
 Public Const cMAROON As Long = 5066944
 Public Const cWHITE As Long = 16777215
-
-
-
-
-
 
 ' ==========================================================================================================================================================================
 '                                   Types used in functions below
@@ -47,11 +39,6 @@ Public Type FileData
     fDateModified As Date
     fType As String
 End Type
-
-
-
-
-
 
 
 ' ==========================================================================================================================================================================
@@ -374,7 +361,7 @@ Private Sub GetAllFilesFromFolder(baseFolder As Folder, ByRef count As Integer, 
             arrayForExtension = Split(aFile.Name, ".")
             count = count + 1
             ReDim Preserve filePaths(1 To count)
-            filePaths(count).fPath = aFile.path ' add filepath to array
+            filePaths(count).fPath = aFile.Path ' add filepath to array
             filePaths(count).fParentFolder = aFile.ParentFolder
             filePaths(count).fName = aFile.Name
             filePaths(count).fSize = aFile.Size / 1024
@@ -474,7 +461,7 @@ Public Function GetTodayAsIndexOfDates() As Integer
     Dim dates() As String
     Dim today As String, temp As String
     
-    dates = JamesLibrary.GetDaysOfYear
+    dates = GetDaysOfYear
     today = Format(DateTime.Now, "ddd d mmm")
     
     For i = 1 To UBound(dates, 2)
