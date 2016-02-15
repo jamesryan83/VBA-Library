@@ -30,7 +30,7 @@ Public Const cWHITE As Long = 16777215
 ' ==========================================================================================================================================================================
 
 ' This is used in GetArrayOfFilePaths()
-Public Type FileData
+Public Type fileData
     fPath As String
     fParentFolder As String
     fName As String
@@ -255,25 +255,30 @@ End Sub
 ' ==========================================================================================================================================================================
 
 'Append a string onto the end of an array
-Public Sub AppendToStringArray(ByRef myArray() As String, text As String, ByRef count As Integer)
+Public Sub AppendToStringArray(ByRef myArray() As String, text As String, ByRef count As Long)
     count = count + 1
     ReDim Preserve myArray(1 To count)
     myArray(count) = text
 End Sub
 
 'Append a integer onto the end of an array
-Public Sub AppendToIntegerArray(ByRef myArray() As Integer, number As Integer, ByRef count As Integer)
+Public Sub AppendToIntegerArray(ByRef myArray() As Integer, number As Integer, ByRef count As Long)
     count = count + 1
     ReDim Preserve myArray(1 To count)
     myArray(count) = number
 End Sub
 
 'Append a double onto the end of an array
-Public Sub AppendToDoubleArray(ByRef myArray() As Double, number As Double, ByRef count As Integer)
+Public Sub AppendToDoubleArray(ByRef myArray() As Double, number As Double, ByRef count As Long)
     count = count + 1
     ReDim Preserve myArray(1 To count)
     myArray(count) = number
 End Sub
+
+
+
+
+
 
 
 
@@ -293,6 +298,35 @@ Public Sub SaveCopyOfWorkbook(filePath As String, wb As Workbook, Optional displ
     wb.SaveCopyAs filePath
     Application.displayAlerts = True
 End Sub
+
+
+' Read text from a text file as a string
+Public Function ReadStringFromTextFile(filePath As String) As String
+    Dim fso As New FileSystemObject
+    Dim stream As TextStream
+        
+    Set stream = fso.OpenTextFile(filePath, IOMode.ForReading, False)
+    
+    ReadStringFromTextFile = stream.ReadAll
+End Function
+
+
+' Read text from a text file as a string
+Public Function ReadStringArrayFromTextFile(filePath As String) As String()
+    Dim fso As New FileSystemObject
+    Dim stream As TextStream
+    Dim count As Long
+    Dim data() As String
+                
+    Set stream = fso.OpenTextFile(filePath, IOMode.ForReading, False)
+    
+    count = 0
+    Do
+        Call AppendToStringArray(data, stream.ReadLine(), count)
+    Loop Until stream.AtEndOfStream = True
+        
+    ReadStringArrayFromTextFile = data
+End Function
 
 
 'Write a string to a text file
@@ -327,28 +361,29 @@ End Sub
 
 
 ' Returns an array of all the filePaths from the folderPath and any sub folders within that folder
-Public Function GetArrayOfFilePaths(basePath As String) As FileData()
+Public Function GetArrayOfFilePaths(basePath As String, Optional pathOnly As Boolean = False) As fileData()
     
     Dim fso As New FileSystemObject
-    Dim filePaths() As FileData
+    Dim filePaths() As fileData
     Dim count As Integer
     Dim baseFolder As Folder
     
     count = 0
 
     Set baseFolder = fso.GetFolder(basePath)
-    Call GetAllFilesFromFolder(baseFolder, count, filePaths)
+    Call GetAllFilesFromFolder(baseFolder, count, filePaths, pathOnly)
     
     GetArrayOfFilePaths = filePaths
 End Function
 
 
-' Returns all files in all folders for a particular base folder - called from function above
-Private Sub GetAllFilesFromFolder(baseFolder As Folder, ByRef count As Integer, ByRef filePaths() As FileData)
+' Returns all files in all folders for a particular base folder
+' is recursive and called from function above
+Private Sub GetAllFilesFromFolder(baseFolder As Folder, ByRef count As Integer, ByRef filePaths() As fileData, Optional pathOnly As Boolean = False)
     
     Dim subFolder As Folder
     Dim aFile As File
-    Dim arrayForExtension() As String
+    Dim arrayForFileExtension() As String
     
     If baseFolder.SubFolders.count > 0 Then
         For Each subFolder In baseFolder.SubFolders
@@ -358,16 +393,20 @@ Private Sub GetAllFilesFromFolder(baseFolder As Folder, ByRef count As Integer, 
     
     If baseFolder.Files.count > 0 Then
         For Each aFile In baseFolder.Files
-            arrayForExtension = Split(aFile.Name, ".")
+            
             count = count + 1
             ReDim Preserve filePaths(1 To count)
-            filePaths(count).fPath = aFile.Path ' add filepath to array
-            filePaths(count).fParentFolder = aFile.ParentFolder
-            filePaths(count).fName = aFile.Name
-            filePaths(count).fSize = aFile.Size / 1024
-            filePaths(count).fDateCreated = Format(aFile.DateCreated, "dd/mm/yy")
-            filePaths(count).fDateModified = Format(aFile.DateLastModified, "dd/mm/yy")
-            filePaths(count).fType = arrayForExtension(UBound(arrayForExtension))
+            filePaths(count).fPath = aFile.path ' add filepath to array
+            
+            If pathOnly = False Then
+                filePaths(count).fParentFolder = aFile.ParentFolder
+                filePaths(count).fName = aFile.Name
+                filePaths(count).fSize = aFile.Size / 1024
+                filePaths(count).fDateCreated = Format(aFile.DateCreated, "dd/mm/yy")
+                filePaths(count).fDateModified = Format(aFile.DateLastModified, "dd/mm/yy")
+                arrayForFileExtension = Split(aFile.Name, ".")
+                filePaths(count).fType = arrayForFileExtension(UBound(arrayForFileExtension))
+            End If
         Next
     End If
 End Sub
